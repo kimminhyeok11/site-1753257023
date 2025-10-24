@@ -3,345 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>욕망의 뫼비우스</title>
+    <title>DART 재무제표 조회</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .vignette-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.9) 100%); }
-        .game-text-shadow { text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9); }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .text-box { background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background-color: #9ca3af; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background-color: #f3f4f6; }
+        .loader { border-top-color: #3498db; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* 요청대로 모든 요소를 작게 만듭니다 */
+        body, input, select, button, label, p, th, td {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        input, select, button {
+            padding: 5px 8px;
+        }
+        h1 {
+            font-size: 14px;
+        }
+        table {
+            font-size: 10px;
+        }
     </style>
 </head>
-<body class="bg-black text-white">
-    <div id="game-container" class="relative w-full h-screen overflow-hidden cursor-pointer"></div>
-<script>
-    const storyData = {
-  "title": "욕망의 뫼비우스",
-  "setting": "대한민국, 2023년. 화려한 밤의 세계와 차가운 현실이 공존하는 도시. 룸살롱의 빛과 그림자, 그리고 잊을 수 없는 욕망의 흔적이 남은 장소.",
-  "synopsis": "화려한 언변으로 20대 아가씨를 유혹했던 남자는 그녀와의 격정적인 시간을 행복이라 여겼지만, 어느 날 관 속에서 깨어난다. 과거의 욕망과 현재의 절망 속에서, 그는 자신을 가둔 자를 찾아 과거의 흔적을 되짚어간다.",
-  "ending": "진실을 마주한 주인공은 복수와 용서 사이에서 갈등하며, 영원히 벗어날 수 없는 욕망의 굴레를 깨닫는다.",
-  "art_style_guide": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting, featuring Korean actors.",
-  "art_style_selection": "k-movie",
-  "characters": [
-    {
-      "name": "강태준",
-      "role": "player",
-      "description": "40대 초반, 능글맞은 언변과 매력적인 외모를 가진 남자. 과거 룸살롱에서 화려한 밤을 보냈지만, 현재는 관 속에 갇힌 채 혼란스러워한다. 욕망에 솔직하며 자기 파괴적인 성향을 보인다.",
-      "status": "서연에 대한 의심 극대화, 최 이사에 대한 불신 시작, 김민준과의 만남을 통해 진실을 밝히려는 의지 확고"
-    },
-    {
-      "name": "서연",
-      "role": "main",
-      "description": "20대 중반, 룸살롱 아가씨. 아름다운 외모 뒤에 숨겨진 상처와 욕망을 가지고 있다. 강태준에게 강렬한 감정을 느끼지만, 그의 과거에 얽힌 비밀을 알고 있다.",
-      "status": "과거 남자친구 (김민준) 존재 부각, 박 실장과의 관계 의혹 증폭"
-    },
-    {
-      "name": "김 형사",
-      "role": "supporting",
-      "description": "40대 후반, 베테랑 형사. 강태준의 사건을 수사하며 그의 과거를 파헤친다. 냉철하고 직관적인 성격을 가졌다.",
-      "status": "강태준을 용의자로 의심하며 수사망을 좁혀감"
-    },
-    {
-      "name": "박 실장",
-      "role": "supporting",
-      "description": "50대 초반, 룸살롱 실장. 밤의 세계에 오래 몸담아 온 인물로, 강태준과 서연의 관계를 알고 있다. 돈에 밝고 냉정한 성격.",
-      "status": "사망, 사건의 미스터리를 심화시킴"
-    }
-  ],
-  "plan": [
-    "1장: 어둠 속의 각성 - 차가운 관 속에서 깨어난 강태준, 절망과 혼란에 빠지다.",
-    "2장: 기억의 파편 - 과거 룸살롱에서의 화려한 밤, 서연과의 만남을 회상하다.",
-    "3장: 욕망의 흔적 - 서연과의 격정적인 시간, 캠핑, 옥상 비상계단 등 장소를 되짚어보다.",
-    "4장: 사라진 그녀 - 서연의 행방을 찾기 위해 과거의 동료들을 만나 단서를 모으다.",
-    "5장: 그림자 속의 진실 - 서연의 과거 남자친구의 존재, 복수의 가능성을 암시하다.",
-    "6장: 엇갈린 증언 - 형사의 수사망이 좁혀오고, 주변 인물들의 증언이 엇갈리기 시작하다.",
-    "7장: 밤의 장막 뒤에 숨겨진 비밀 - 룸살롱 실장을 통해 밝혀지는 서연과 강태준의 숨겨진 관계.",
-    "8장: 함정 - 예상치 못한 인물의 배신, 강태준은 더 깊은 함정에 빠지다."
-  ],
-  "story": {
-    "chapter_0": {
-      "title": "1장: 어둠 속의 각성 - 차가운 관 속에서 깨어난 강태준, 절망과 혼란에 빠지다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A 검은 머리의 젊은 남자 struggles to open a wooden coffin in a dark, claustrophobic space. His face is filled with confusion and fear. Light streams weakly from a small crack in the lid.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_0-1753255655310.png",
-      "content": [
-        "어둠, 칠흑 같은 어둠이 모든 감각을 삼켜버렸다. 아니, 정확히는 차가움이 먼저였다. 얼음장처럼 냉랭한 기운이 온몸을 짓누르고, 그제야 숨 막히는 답답함이 폐 속으로 밀려 들어왔다. 눈을 떴지만 보이는 건 아무것도 없었다. 손을 뻗어 더듬거려보니 나무… 나무였다. 매끄럽지만 어딘가 거친 감촉. 관… 관 속에 갇힌 건가?",
-        "숨을 쉴 때마다 퀴퀴한 곰팡이 냄새가 코를 찔렀다. 대체 왜? 내가 왜 여기 있는 거지? 마지막 기억은… 서연이… 그래, 서연이와 함께 와인을 마시며 웃고 있었는데. “태준 씨, 오늘따라 더 멋있어 보이네요.” 그녀의 붉은 입술이 내 귓가에 속삭였던가. “당신 눈엔 늘 그렇죠.” 나는 능글맞게 받아쳤었다. 그 후론 기억이 끊겼다.",
-        "머리를 흔들어 과거의 기억 조각들을 떨쳐내려 애썼다. 지금은 탈출하는 게 먼저다. 온 힘을 다해 관 뚜껑을 밀어 올리려 했지만, 꿈쩍도 하지 않았다. 젠장, 꼼짝없이 갇혔어. 절망감이 파도처럼 밀려왔다. 이대로 죽는 건가? 화려한 언변으로 아가씨들을 꼬시던 강태준이, 이렇게 허무하게?",
-        "“젠장, 젠장!” 나는 분노에 차서 고함을 질렀다. 목소리는 텅 빈 공간에 갇혀 메아리처럼 울릴 뿐이었다. ‘제발 누가 좀 도와줘!’ 속으로 외쳤지만, 응답은 없었다. 어둠과 침묵만이 나를 옭아맬 뿐이었다. 서연이는? 그녀는 알고 있을까? 아니, 그녀가 나를 여기에 가둔 걸까?",
-        "희미하게 빛이 새어 들어오는 틈새를 발견했다. 필사적으로 그 틈을 넓히려 손톱으로 나무를 긁었다. 손톱이 부러지고, 손가락에서 피가 흘렀지만 멈출 수 없었다. 살아야 한다. 무슨 일이 있어도 이 끔찍한 곳에서 나가야 한다. 틈새가 조금씩 벌어지기 시작했다.",
-        "마침내 틈새가 손 하나 겨우 들어갈 정도로 벌어졌다. 나는 있는 힘껏 뚜껑을 밀어 올렸다. 삐걱거리는 소리와 함께 뚜껑이 열리고, 눈부신 빛이 쏟아져 들어왔다. 눈을 가늘게 뜨고 주위를 둘러봤다. 낡은 창고… 텅 빈 창고였다.",
-        "몸을 일으켜 세우자 다리가 후들거렸다. 얼마나 오랫동안 갇혀 있었던 걸까? 온몸이 쑤시고, 갈증이 심하게 느껴졌다. 창고 문을 향해 비틀거리며 걸어갔다. 문은 잠겨 있지 않았다. 밖으로 나가자 싸늘한 밤공기가 폐 속 깊숙이 파고들었다.",
-        "나는 숨을 크게 쉬며 주변을 둘러봤다. 인적은 전혀 없고, 가로등 불빛만이 희미하게 길을 비추고 있었다. 어디로 가야 할까? 우선 서연이를 찾아야 한다. 그녀가 모든 걸 알고 있을 거야. 아니면… 그녀가 범인일 수도 있다. 하지만 지금은 그녀밖에 믿을 사람이 없다.",
-        "주머니를 뒤져 핸드폰을 찾았다. 다행히 배터리는 조금 남아 있었다. 서연이에게 전화를 걸었다. 몇 번의 신호음이 울린 후, 그녀의 목소리가 들려왔다. \"여보세요? 누구세요?\" 그녀의 목소리는 평소와 다르게 어딘가 불안해 보였다. “서연아, 나야. 태준이야.”",
-        "잠시 정적이 흘렀다. “태… 태준 씨? 어떻게… 어떻게 된 거예요?” 그녀의 목소리가 떨리고 있었다. “말할 시간이 없어. 지금 당장 만나야 해. 네 집 앞으로 갈게.” 전화를 끊고, 나는 비틀거리는 발걸음을 옮겼다. 서연이를 만나면 모든 걸 알 수 있을 거야. 하지만… 어쩐지 불안한 예감이 엄습해왔다. 창고 바닥에 떨어진 낡은 명함 한 장이 눈에 들어왔다. [박 실장]… 나는 그 이름을 잊지 않기로 했다."
-      ]
-    },
-    "chapter_1": {
-      "title": "2장: 기억의 파편 - 과거 룸살롱에서의 화려한 밤, 서연과의 만남을 회상하다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A black-haired man ( 강태준 ) sits alone in a dimly lit room, nursing a drink. He stares intensely at a photo of a beautiful woman ( 서연 ) on the table. The room is luxurious, suggesting a high-end bar or club. The atmosphere is heavy with reminiscence and suspicion.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_1-1753255674570.png",
-      "content": [
-        "서연의 집 앞에서 택시를 잡아탔다. 낡은 창고의 냉기가 채 가시지 않은 몸은 격렬하게 떨려왔다. 핸드폰을 꽉 움켜쥐었다. 서연… 그녀는 대체 무슨 생각인 걸까? 과거 룸살롱에서의 화려한 밤들이 주마등처럼 스쳐 지나갔다. 그때의 나는 마치 세상을 다 가진 남자처럼 거만했었지.",
-        "‘강태준, 오늘따라 유난히 멋있어 보이네.’ 서연의 달콤한 속삭임이 귓가에 맴돌았다. 그녀는 항상 나를 올려다보는 눈빛을 하고 있었다. 순수하고 맑은 눈망울. 그때는 그 눈을 의심할 생각조차 못 했다. 룸살롱의 삐까번쩍한 조명 아래, 그녀는 마치 천사처럼 빛나고 있었으니까.",
-        "“아가씨, 오늘 기분 좋아 보이네?” 나는 능글맞게 웃으며 그녀의 뺨을 쓰다듬었다. “당연하죠. 태준 씨 덕분인데요.” 그녀는 수줍게 웃으며 내 어깨에 기대왔다. ‘이 여자, 내가 제대로 낚았구나.’ 그때의 나는 그렇게 생각했었다. 그 오만함이 지금의 나를 이 꼴로 만들었을지도 모른다.",
-        "서연과의 만남은 우연이 아니었다. 박 실장이 기획한 자리였다. ‘강 사장, 이번에 새로 들어온 아가씨인데, 아주 싹싹하고 일도 잘합니다.’ 박 실장은 싱글벙글 웃으며 서연을 내 옆에 앉혔다. 그는 늘 그런 식이었다. 필요하다면 여자든 돈이든 뭐든 가져다 바치는.",
-        "“서연 씨, 술 한잔 따라봐.” 나는 거만하게 술잔을 내밀었다. 그녀는 망설이는 듯하더니 이내 조심스럽게 술을 따랐다. “처음 뵙겠습니다, 강 사장님. 잘 부탁드립니다.” 그녀의 목소리는 가늘고 떨리고 있었다. 나는 그녀의 손목을 잡아끌어 내 옆자리에 앉혔다. 그 순간, 그녀의 눈빛이 살짝 흔들렸던 것 같기도 하다.",
-        "그 후로 우리는 급속도로 가까워졌다. 룸살롱에서 시작된 인연은 곧 격정적인 관계로 발전했다. 나는 그녀에게 아낌없이 돈을 썼고, 그녀는 나에게 헌신적인 사랑을 쏟아부었다. 적어도 그때는 그렇게 믿었다. ‘태준 씨, 정말 사랑해요.’ 그녀의 뜨거운 입술이 내 목덜미를 탐닉할 때, 나는 그 말을 의심하지 않았다.",
-        "택시가 서연의 집 앞에 도착했다. 낡은 빌라, 룸살롱에서 보던 화려한 모습과는 거리가 멀었다. ‘정말 여기가 맞아?’ 기사는 의아한 표정으로 나를 쳐다봤다. “저기… 손님, 괜찮으시겠어요?” 나는 대답 대신 팁을 두둑하게 쥐여주고 택시에서 내렸다.",
-        "초인종을 누르려다 멈칫했다. 지금 내 모습은 엉망진창일 것이다. 하지만 상관없다. 나는 진실을 알아야 한다. 숨을 크게 쉬고 초인종을 눌렀다. ‘딩동’ 낡은 초인종 소리가 적막을 깼다. 문이 열리고, 서연이 불안한 표정으로 나를 맞이했다.",
-        "“태준 씨… 정말 당신이에요?” 그녀의 눈에는 눈물이 글썽거리고 있었다. “서연아, 대체 무슨 일이 있었던 거야? 왜 내가 관 속에 갇혀 있었던 거지?” 나는 다그치듯 물었다. 그녀는 아무 말 없이 나를 끌어안았다. 그녀의 품은 따뜻했지만, 어딘가 모르게 싸늘한 기운이 느껴졌다.",
-        "“일단 들어와요. 여기서 얘기할 상황이 아니에요.” 그녀는 내 손을 잡고 집 안으로 이끌었다. 좁고 허름한 집, 룸살롱에서 보던 그녀의 화려함은 어디에도 없었다. 방 한 켠에 놓인 낡은 액자가 눈에 들어왔다. 액자 속에는… 박 실장과 서연이 다정한 모습으로 함께 웃고 있었다. ‘젠장… 대체 무슨 속셈이지?’ 나는 이를 악물었다."
-      ]
-    },
-    "chapter_2": {
-      "title": "3장: 욕망의 흔적 - 서연과의 격정적인 시간, 캠핑, 옥상 비상계단 등 장소를 되짚어보다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A black-haired young man ( 강태준 ) stands in 서연 's modest living room, looking around with a mixture of suspicion and confusion. 서연 stands nearby, her expression a blend of sadness and concern. In the background, a photo of 서연 and 박 실장 is visible on a shelf.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_2-1753255697978.png",
-      "content": [
-        "액자 속 박 실장의 얼굴은 능글맞았다. 마치 모든 걸 알고 있다는 듯한 미소. 서연은 그런 나를 안쓰럽게 바라보며 소파에 앉혔다. “태준 씨, 일단 진정해요. 모든 걸 설명해 줄게요.” 그녀의 목소리는 여전히 떨리고 있었지만, 아까보다는 조금 안정된 듯했다. 나는 그녀의 말에 애써 침착하려 노력하며 숨을 골랐다. 젠장, 이 상황이 대체 어떻게 돌아가는 건지 도무지 감이 잡히지 않았다.",
-        "“설명? 좋아, 어디 한번 해봐. 박 실장하고 당신, 대체 무슨 관계야? 그리고 왜 내가 관 속에 갇혀 있었던 거지?” 나는 차가운 목소리로 그녀를 몰아세웠다. 서연은 잠시 망설이는 듯하더니, 입을 열었다. “태준 씨… 모든 건 오해에서 시작됐어요. 박 실장님은….” 그녀는 말을 멈추고 눈물을 글썽거렸다. “박 실장님은… 제 아버지세요.” 아버지? 그 늙은 여우 같은 인간이?",
-        "그녀의 말에 나는 어이가 없어 웃음이 나왔다. “아버지? 웃기지 마. 박 실장이 당신 아버지라고? 그럼 당신은 대체… 날 뭘로 생각한 거야?” 분노가 끓어올랐다. 나는 소파에서 벌떡 일어나 서연에게 다가갔다. 그녀는 뒷걸음질 치며 애원했다. “태준 씨, 제발… 믿어주세요. 정말 오해가 있어요. 모든 걸 다 말할게요. 하지만… 여긴 안전하지 않아요.”",
-        "안전하지 않다? 그 말이 끝나기가 무섭게, 나는 과거 서연과의 뜨거웠던 순간들이 파노라마처럼 스쳐 지나갔다. 캠핑, 옥상 비상계단, 한적한 바닷가… 그 모든 장소가 마치 덫처럼 느껴졌다. ‘젠장, 어쩌면 처음부터 계획된 걸지도 몰라.’ 불안감이 엄습해왔다. \"어디가 안전한데?\" 나는 다급하게 물었다. 그녀는 망설이다가 작은 목소리로 답했다. \"…그 캠핑장 근처에, 우리만 아는 은신처가 있어요.\"",
-        "“그 은신처에 가면 모든 걸 알 수 있다는 거야?” 나는 그녀의 눈을 똑바로 쳐다보며 물었다. 그녀는 고개를 끄덕였다. “거기에는… 모든 진실이 담긴 일기장이 있어요. 박 실장님이… 아니, 아버지가 쓴 일기장이에요.” 일기장? 그 늙은이가 일기 같은 걸 쓸 거라고는 상상도 못 했다. 하지만 지금은 뭐라도 잡아야 했다. 나는 서연의 손을 잡고 집을 나섰다. “좋아, 가자. 그 은신처로.”",
-        "택시를 잡아타고 캠핑장으로 향하는 동안, 나는 끊임없이 서연을 의심했다. 그녀의 말은 과연 진실일까? 아니면 또 다른 함정일까? 과거 룸살롱에서 처음 만났을 때부터, 그녀는 마치 연기자처럼 완벽하게 나를 속여왔다. “서연아, 정말 솔직하게 말해봐. 당신, 나한테 뭘 숨기고 있는 거야?” 나는 그녀의 눈을 꿰뚫어 볼 듯이 쏘아봤다.",
-        "서연은 침묵했다. 그녀의 얼굴에는 복잡한 감정이 스쳐 지나갔다. 슬픔, 불안, 그리고… 죄책감. 나는 그녀의 침묵 속에서 진실을 엿보려 애썼다. ‘정말 그녀도 어쩔 수 없는 상황이었던 걸까? 아니면….’ 그때, 그녀가 입을 열었다. “태준 씨… 사실….” 그녀는 차마 말을 잇지 못하고 고개를 숙였다. 마치 무언가를 감추려는 듯했다.",
-        "캠핑장 입구에 도착했을 때, 김 형사에게서 전화가 걸려왔다. 발신자 표시를 확인하는 순간, 심장이 덜컥 내려앉는 듯했다. 나는 전화를 받을까 말까 망설였다. “왜 그래요? 전화 안 받아요?” 서연이 불안한 표정으로 물었다. 나는 그녀의 눈을 잠시 바라보다가, 통화 버튼을 눌렀다. “여보세요?” 내 목소리는 심하게 떨리고 있었다.",
-        "“강태준 씨, 지금 어디십니까?” 김 형사의 목소리는 냉정했다. “지금… 잠깐 드라이브 중입니다. 무슨 일 있으십니까?” 나는 애써 침착하게 대답했다. “강태준 씨, 지금 즉시 경찰서로 출두해 주십시오. 박 실장님께서… 살해당하셨습니다.” 살해? 박 실장이? 그 말에 나는 망치로 머리를 얻어맞은 듯 멍해졌다. “지금… 뭐라고 하셨습니까?”",
-        "김 형사는 다시 한번 또박또박 말했다. “박 실장님이 살해당하셨습니다. 그리고 강태준 씨, 당신은… 유력한 용의자입니다.” 전화가 끊어지고, 나는 멍하니 핸드폰을 바라봤다. 서연은 창백한 얼굴로 나를 쳐다보고 있었다. “태준 씨… 대체 어떻게 된 일이에요?” 나는 대답 대신, 택시 기사에게 소리쳤다. “돌아가요! 당장 서울로 돌아가!” 그리고 서연에게 속삭였다. “이제… 아무도 믿을 수 없어.”"
-      ]
-    },
-    "chapter_3": {
-      "title": "4장: 사라진 그녀 - 서연의 행방을 찾기 위해 과거의 동료들을 만나 단서를 모으다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A black-haired young man ( 강태준 ), with a determined expression, stands in a dimly lit back alley, a flickering neon sign casting shadows on his face. He's talking on his phone, his voice urgent. In the background, a hooded figure watches him from a distance.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_3-1753255717514.png",
-      "content": [
-        "택시 안, 심장이 미친 듯이 쿵쾅거렸다. 박 실장이 살해당했다니. 유력한 용의자는 나라고? 믿을 수 없었다. 서연은 옆에서 넋이 나간 사람처럼 창밖만 바라봤다. \"서연아, 대체 어떻게 된 거야? 네 아버지가 왜… 그리고 왜 내가 용의자인 거지?\" 내 목소리는 격앙되어 있었다.",
-        "서연은 아무 대답도 하지 않았다. 마치 껍데기만 남은 사람 같았다. \"서연아!\" 나는 그녀의 어깨를 붙잡고 흔들었다. 그제야 그녀는 멍한 눈으로 나를 바라봤다. \"몰라… 정말 몰라. 나도 아무것도 몰라…\" 그녀의 목소리는 가늘게 떨렸다. \"그럼 은신처는? 일기장은?\" 나는 다급하게 물었다. \"거기에 모든 게 있다고 했잖아!\"",
-        "\"이제… 이제 아무것도 믿을 수 없어.\" 서연은 고개를 저으며 중얼거렸다. 그 순간, 나는 깨달았다. 그녀에게서 더 이상 정보를 얻을 수 없다는 것을. 그녀 역시 누군가에게 조종당하고 있는지도 모른다. 나는 이를 악물고 택시 기사에게 목적지를 변경해달라고 말했다. \"예전 룸살롱, '아리아' 앞으로 가주세요.\"",
-        "택시가 '아리아' 앞에 멈춰 섰다. 몇 년 만에 다시 오는 곳이었다. 화려한 네온사인과 호객꾼들의 목소리가 귓가를 때렸다. 나는 깊게 숨을 쉬고 택시에서 내렸다. \"여기서 뭐 하려는 거예요?\" 서연이 불안한 눈빛으로 물었다. \"네 아버지와 관련된 사람들을 만나봐야겠어. 혹시라도 뭔가 아는 사람이 있을지도 모르니까.\"",
-        "나는 '아리아' 안으로 들어섰다. 예전과는 분위기가 많이 달라져 있었다. 하지만 익숙한 얼굴들이 몇몇 눈에 띄었다. 예전 마담이었던 김미숙 누나를 찾아 카운터로 향했다. \"누나, 저 왔어요.\" 내 목소리에 김미숙은 깜짝 놀라며 나를 껴안았다. \"어머, 태준이 아니니? 대체 몇 년 만이야! 그동안 어디서 뭘 하고 다닌 거야?\"",
-        "\"누나, 드릴 말씀이 있어서 왔어요. 혹시 박 실장님, 요즘 무슨 일 없으셨어요?\" 내 질문에 김미숙의 얼굴이 굳어졌다. \"박 회장님? 왜? 무슨 일이라도 있는 거야?\" 나는 자초지종을 설명했다. 박 실장이 살해당했고, 내가 용의자로 지목받았다는 사실을. 김미숙은 충격에 휩싸인 표정으로 입을 다물지 못했다.",
-        "\"세상에… 그런 일이. 태준아, 내가 아는 선에서 최대한 도와줄게. 잠시만 기다려봐.\" 김미숙은 잠시 생각에 잠기더니, 누군가에게 전화를 걸었다. \"어, 나야. 혹시 요즘 박 회장님 주변에 특이한 움직임 없었어? …그래? 알았어. 끊어.\"",
-        "전화를 끊은 김미숙은 나에게 말했다. \"태준아, 박 회장님 주변에 좀 이상한 놈들이 붙어 다녔다고 해. 덩치 큰 깡패 같은 녀석들이. 그리고… 최근에 돈 문제로 꽤나 골치 아팠던 모양이야. 투자했던 사업이 잘못됐다는 소문도 있고.\"",
-        "\"돈 문제… 투자 사업… 혹시 더 자세히 아는 거 있어요?\" 나는 다급하게 물었다. 김미숙은 고개를 저었다. \"미안해, 나도 들은 얘기밖에 없어. 하지만… 혹시 도움이 될까 해서. 박 회장님이 마지막으로 자주 갔던 술집이 있어. 강남에 있는 '엘도라도'라고. 거기 가면 뭔가 단서를 찾을 수 있을지도 몰라.\"",
-        "\"엘도라도… 감사합니다, 누나.\" 나는 김미숙에게 고맙다는 인사를 하고 '아리아'를 나섰다. 택시를 잡아타고 강남으로 향하는 동안, 서연은 여전히 침묵을 지켰다. 하지만 나는 알고 있었다. 그녀 역시 뭔가 숨기고 있다는 것을. 엘도라도에 도착하기 직전, 서연이 입을 열었다. \"태준 씨… 잠깐만요. 저… 화장실 좀 다녀올게요.\" 그리고는 택시에서 내려 인파 속으로 사라졌다. 나는 그녀를 불렀지만, 그녀는 뒤돌아보지 않았다. 사라진 그녀의 뒷모습을 보며, 나는 더욱 깊은 절망에 빠져들었다. 이제 정말 혼자가 된 건가."
-      ]
-    },
-    "chapter_4": {
-      "title": "5장: 그림자 속의 진실 - 서연의 과거 남자친구의 존재, 복수의 가능성을 암시하다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A black-haired young man (강태준), wearing a dark coat, stands alone in front of a brightly lit bar named '엘도라도'. Rain is gently falling, reflecting the neon lights on the wet street. His expression is a mix of determination and sadness. In the background, a woman (서연) with long hair disappears into the crowd.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_4-1753255737387.png",
-      "content": [
-        "서연이 사라진 거리를 하염없이 바라봤다. '엘도라도'의 번쩍이는 간판 불빛이 젖은 아스팔트 위에 어지럽게 흩뿌려졌다. 또다. 또다시 혼자 남겨졌다. 그녀의 불안이, 죄책감이, 혹은 다른 무언가가 그녀를 도망치게 만들었을 것이다. 중요한 건, 이제 그녀를 믿을 수 없다는 사실이었다. 혼란스러운 마음을 다잡고 '엘도라도' 안으로 발을 들였다. 끈적한 담배 연기와 싸구려 향수 냄새가 코를 찔렀다.",
-        "바텐더는 닳아빠진 미소를 지으며 내게 다가왔다. \"어서 오세요. 뭐 드릴까요?\" 나는 그의 눈을 똑바로 쳐다봤다. \"박 실장… 아니, 박 회장이라고 해야 하나. 혹시 최근에 자주 오지 않았나?\"",
-        "바텐더의 얼굴에 순간 당황한 기색이 스쳤다. \"박… 회장님이라면… 글쎄요. 손님이 워낙 많아서 기억이 잘 안 나네요.\" 능글맞은 미소를 잃지 않으려 애쓰는 모습이 역력했다. 나는 지갑에서 5만 원짜리 몇 장을 꺼내 바 테이블 위에 올려놓았다. \"기억력이 갑자기 좋아질 수도 있지 않나?\"",
-        "바텐더는 돈을 잽싸게 챙기며 딴청을 피웠다. \"아, 글쎄요. 정말 기억이 안 나는데…\" 그때, 등 뒤에서 낯익은 목소리가 들려왔다. \"박 회장이라면, 그 돈에 몇 배는 더 얹어줘야 할 텐데.\"",
-        "뒤를 돌아보니, 험악한 인상의 남자 둘이 팔짱을 낀 채 서 있었다. 머리를 짧게 자른 남자가 나를 쏘아보며 말했다. \"무슨 일로 박 회장을 찾는 거지? 혹시 빚쟁이라도 되나?\" 나는 침착하게 대답했다. \"볼일이 좀 있어서요. 혹시 아는 거 있으시면 말씀해주시겠습니까?\"",
-        "\"글쎄, 우린 아무것도 모르는 것 같은데.\" 덩치 큰 남자가 어깨를 으쓱하며 비아냥거렸다. 그들의 태도를 보니, 더 이상 정보를 얻어내기는 힘들 것 같았다. 그때, 짧은 머리 남자가 갑자기 웃음을 터뜨렸다. \"그런데 말이야… 박 회장이 죽었다는 소식, 벌써 들었나?\"",
-        "심장이 쿵 내려앉는 기분이었다. \"뭐라고? 죽었다고?\" 내 목소리는 떨리고 있었다. 남자는 더욱 크게 웃으며 대답했다. \"그래, 맞아. 어젯밤에 아주 끔찍하게 죽었지. 네가 마지막으로 봤던 사람이라던데? 경찰들이 널 용의자로 보고 있다는 소문도 있고.\"",
-        "그들의 조롱 섞인 시선에 분노가 치밀어 올랐다. 나는 이를 악물고 그들을 노려봤다. \"누가 그랬는지 알고 있겠지.\" 남자는 어깨를 으쓱하며 대답했다. \"글쎄? 세상에는 나쁜 놈들이 너무 많아서. 하지만… 확실한 건, 박 회장이 젊은 여자 때문에 꽤나 골치를 썩였다는 거지. 아주 예쁜 여자 말이야.\"",
-        "예쁜 여자… 서연을 말하는 걸까? 남자는 의미심장한 미소를 지으며 말을 이었다. \"그 여자, 예전에 사귀던 남자 친구가 아주 무서운 놈이었다는 소문이 있던데. 복수심에 불타는 늑대 같은 놈 말이야.\" 복수… 서연의 과거 남자 친구… 머릿속이 복잡해졌다. 서연의 배신, 박 실장의 죽음, 그리고 과거의 그림자… 모든 것이 얽히고설켜 있었다. 택시를 잡아타고 김 형사에게 전화를 걸었다. \"김 형사님, 엘도라도입니다. 지금 바로 와주셔야 할 것 같습니다.\"",
-        "택시가 출발하기 직전, 뒷좌석에 봉투 하나가 놓여 있는 것을 발견했다. 열어보니 오래된 사진 한 장이 들어 있었다. 앳된 얼굴의 서연과 낯선 남자가 다정하게 어깨동무를 하고 있는 모습이 담겨 있었다. 사진 뒷면에는 붉은 글씨로 섬뜩한 문구가 적혀 있었다. '네 욕망의 대가를 치르게 될 것이다.'"
-      ]
-    },
-    "chapter_5": {
-      "title": "6장: 엇갈린 증언 - 형사의 수사망이 좁혀오고, 주변 인물들의 증언이 엇갈리기 시작하다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting. A young Korean detective (김 형사) with a tired expression sits across from a disheveled black-haired young man (강태준) in a dimly lit interrogation room. Papers are scattered on the table between them, and a half-empty coffee cup sits beside the detective. The detective is looking intently at the man, who appears stressed and agitated.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_5-1753255759176.png",
-      "content": [
-        "김 형사의 눈은 날카로운 칼날 같았다. 엘도라도에서 벌어진 소란, 그리고 박 실장의 죽음. 그 모든 것이 나를 향하고 있다는 것을, 그 시선만으로도 알 수 있었다. \"강태준 씨, 어젯밤 11시부터 오늘 새벽 2시 사이에 뭘 하셨습니까?\" 형사의 목소리는 낮고 묵직했다. 마치 덫을 놓듯, 천천히 질문을 던져왔다.",
-        "\"엘도라도에 갔었습니다. 박 실장을 찾으러요. 하지만 만나지 못했고… 돌아오는 길에 그쪽에서 연락을 받고 형사님을 기다렸습니다.\" 나는 최대한 침착하게 대답했다. 거짓은 없었다. 하지만 진실 전부를 말할 수도 없었다. 서연에 대한 이야기는, 아직 꺼낼 수 없었다.",
-        "김 형사는 서류를 뒤적이며 나를 쏘아봤다. \"박 실장을 왜 찾았습니까? 그리고 엘도라도에는 어떻게 간 거죠? 택시 영수증은 어디 있습니까? CCTV 영상에는 강태준 씨가 엘도라도 앞에서 누군가를 기다리는 모습이 찍혀 있습니다. 누굽니까?\" 그의 질문은 쉴 새 없이 쏟아졌다. 마치 파도처럼, 나를 덮쳐왔다.",
-        "\"개인적인 볼일이 있었습니다. 택시는… 기억나지 않습니다. 누군가를 기다린 건 맞지만, 그건…\" 말을 잇지 못했다. 서연을 기다렸다고 말할 수는 없었다. 그녀가 용의선상에 오르는 것을 막아야 했다. \"아는 사람입니다. 지금은 연락이 닿지 않네요.\"",
-        "김 형사는 싸늘하게 웃었다. \"연락이 닿지 않는 아는 사람? 강태준 씨, 지금 제 앞에서 거짓말을 하고 있다는 생각은 안 드십니까? 박 실장은 어젯밤, 둔기에 맞아 사망했습니다. 마지막으로 박 실장을 만난 사람이 강태준 씨라는 증언도 나왔고요.\" 그의 목소리에는 압박감이 가득했다.",
-        "\"증언? 누가 그런 말을 했습니까?\" 나는 격렬하게 항의했다. \"엘도라도의 바텐더입니까? 아니면 그 주변을 맴돌던 깡패들입니까? 그들의 말을 어떻게 믿을 수 있습니까?\" 분노가 끓어올랐다. 누군가 나를 함정에 빠뜨리려 하고 있었다.",
-        "김 형사는 잠시 침묵하더니, 다른 질문을 던졌다. \"서연 씨에 대해서는 어떻게 생각하십니까? 최근에 자주 만났다고 들었습니다. 박 실장과도 아는 사이였던 것 같던데…\" 심장이 쿵 내려앉았다. 김 형사가 서연에 대해서도 알고 있다는 사실이, 나를 더욱 불안하게 만들었다. \"서연이는… 그냥 아는 동생입니다. 박 실장과는… 글쎄요, 잘 모르겠습니다.\"",
-        "\"그냥 아는 동생? 봉투에 담긴 붉은 글씨는 봤겠지, 강태준 씨?\" 김 형사가 테이블 위에 사진을 던졌다. 서연과 그녀의 과거 남자 친구가 함께 찍힌 사진이었다. 뒷면에는 섬뜩한 문구가 적혀 있었다. '네 욕망의 대가를 치르게 될 것이다.' 나는 아무 말도 할 수 없었다. 모든 것이 엉망진창으로 꼬여 있었다. \"서연이… 위험합니다. 그녀를 찾아야 합니다.\"",
-        "\"위험한 건 강태준 씨 같습니다만.\" 김 형사는 자리에서 일어섰다. \"당분간 출국 금지입니다. 그리고… 서연 씨가 연락이 오면 즉시 제게 알려주십시오. 그렇지 않으면… 강태준 씨에게 불리하게 돌아갈 겁니다.\" 그는 차갑게 경고하며 조사실을 나섰다. 나는 텅 빈 공간에 홀로 남겨졌다. 서연, 박 실장, 그리고 과거의 그림자… 이 모든 것은 어디로 향하고 있는 걸까?",
-        "조사실을 나서자, 어둠이 짙게 드리워진 밤거리가 나를 맞이했다. 택시를 잡으려던 순간, 익숙한 얼굴이 눈에 들어왔다. 엘도라도에서 만났던 험악한 인상의 남자 중 한 명이었다. 그는 나를 향해 고갯짓하며 어딘가를 가리켰다. 그 시선이 향한 곳에는, 낯익은 검은색 세단이 주차되어 있었다. 마치 기다리고 있었다는 듯이. 뒷좌석 창문이 스르륵 내려가고, 그 안에서 박 실장의 오른팔이었던 '최 이사'가 나를 바라보고 있었다."
-      ]
-    },
-    "chapter_6": {
-      "title": "7장: 밤의 장막 뒤에 숨겨진 비밀 - 룸살롱 실장을 통해 밝혀지는 서연과 강태준의 숨겨진 관계.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting, featuring Korean actors. A black-haired young man (강태준) is sitting in the backseat of a black sedan at night, talking to a stern-looking Korean man (최 이사) in his late 40s in the front seat. City lights blur in the background.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_6-1753255778119.png",
-      "content": [
-        "최 이사의 검은색 세단은 밤의 장막 속으로 미끄러져 들어갔다. 룸미러 너머로 보이는 그의 얼굴은 어둠에 잠겨 더욱 냉정하게 느껴졌다. '어떻게 된 겁니까, 최 이사? 박 실장님은 왜…' 나는 불안감을 감추지 못하고 물었다. 최 이사는 대답 대신 얇은 미소를 지었다.",
-        "\"진실은 원래 복잡한 법이지. 태준 씨.\" 그의 목소리는 낮고 차분했지만, 어딘가 날카로운 구석이 있었다. \"경찰은 자네를 용의자로 보고 있어. 서연 씨도 마찬가지고. 이대로 가면 둘 다 위험해질 거야. 특히 서연 씨는… 과거 때문에 더.\" 과거? 서연에게 과거 남자친구가 있었다는 사실은 알고 있었지만, 그게 이렇게까지 큰 영향을 미칠 줄은 몰랐다.",
-        "\"서연이… 대체 무슨 과거가 있는 겁니까? 그리고 박 실장님은 왜 돌아가신 거죠?\" 나는 다급하게 질문을 쏟아냈다. 최 이사는 잠시 침묵하더니, 나지막이 입을 열었다. \"서연 씨는… 꽤 유명한 집안의 딸이야. 하지만 과거에 큰 사고를 쳤지. 자세한 건 나중에 알게 될 거야. 박 실장님은… 엘도라도의 돈 문제에 깊숙이 관여하고 있었어. 그게 화근이 된 거지.\"",
-        "차는 강남의 화려한 불빛을 뒤로하고, 외곽의 한적한 골목길로 접어들었다. 곧이어 낡은 건물 앞에 멈춰 섰다. \"여긴…?\" 내가 묻자, 최 이사는 짧게 대답했다. \"룸살롱이야. 박 실장이 자주 드나들던 곳이지. 그곳 실장이 모든 걸 알고 있어.\"",
-        "건물 안으로 들어서자, 요란한 음악 소리와 함께 진한 담배 냄새가 코를 찔렀다. 붉은 조명 아래, 짙은 화장을 한 여자들이 웃음소리를 흘리고 있었다. 최 이사는 능숙하게 웨이터를 불러 룸살롱 실장을 찾았다. 잠시 후, 40대 후반쯤 되어 보이는 여자가 나타났다. 그녀의 얼굴에는 삶의 고단함이 짙게 드리워져 있었다.",
-        "\"최 이사님, 오랜만이네요. 무슨 일로…\" 룸살롱 실장은 최 이사를 반갑게 맞이하며 능글맞게 웃었다. 최 이사는 그녀의 귓가에 무언가를 속삭였다. 그러자 실장의 표정이 굳어졌다. 그녀는 나를 훑어보더니, 조용히 입을 열었다. \"강태준 씨… 맞으시죠? 서연이랑… 대체 무슨 관계죠?\"",
-        "나는 당황한 표정으로 실장을 바라봤다. \"서연이… 와는 그냥 아는 사이입니다. 왜 그러시죠?\" 내 대답에 실장은 코웃음을 쳤다. \"아는 사이? 웃기지 마세요. 서연이는 박 실장이 엄청 아끼던 애인이었어요. 당신이 서연이 옆에 얼쩡거리는 걸 박 실장이 몹시 싫어했죠. 그래서 당신을 뒷조사까지 시켰다고요.\"",
-        "충격적인 사실에 나는 말을 잇지 못했다. 서연이 박 실장의 애인이었다니… 나는 그녀에게 철저하게 속고 있었던 것인가? \"그럼 서연이는… 왜 나에게 접근한 거죠?\" 나의 질문에 실장은 어깨를 으쓱했다. \"글쎄요. 박 실장의 돈을 노렸을 수도 있고, 아니면… 당신을 이용해서 뭔가를 하려던 걸 수도 있겠죠. 서연이는… 머리가 아주 좋은 여자니까.\"",
-        "최 이사는 나를 데리고 룸을 나섰다. 복도를 걸어가면서 그는 나지막이 말했다. \"들은 대로야. 서연 씨는 위험한 여자야. 하지만… 그녀에게 숨겨진 비밀이 더 있다는 것도 잊지 마. 다음 목적지는 서연 씨의 과거 남자친구, '김민준'이라는 녀석이야. 그 녀석이 모든 걸 알고 있을 거야.\""
-      ]
-    },
-    "chapter_7": {
-      "title": "8장: 함정 - 예상치 못한 인물의 배신, 강태준은 더 깊은 함정에 빠지다.",
-      "image_prompt": "Photorealistic, cinematic shot from a modern Korean drama, sharp focus, detailed textures, natural lighting, featuring Korean actors. A black-haired young man (강태준) is sitting in a dimly lit cafe, looking shocked and betrayed. Across from him sits a stern-looking Korean man (최 이사) in his late 40s, his face partially obscured by shadow. Coffee cups and scattered papers are on the table.",
-      "image_url": "https://obbmtrxhmhokzvuxdqlc.supabase.co/storage/v1/object/public/images/f5fc09fc-0c11-4962-9980-041c7c2662ea/main_story/chapter_7-1753255794465.png",
-      "content": [
-        "최 이사의 다음 목적지는 서연의 과거 남자친구, 김민준이라는 녀석이라고 했다. 하지만, 룸살롱을 나서는 순간, 나는 본능적으로 무언가 잘못되었음을 감지했다. 최 이사의 미묘한 표정 변화, 그리고 룸살롱 실장과의 짧은 대화에서 느껴지는 묘한 긴장감. 모든 것이 나를 함정으로 몰아넣고 있다는 불길한 예감이 엄습했다.",
-        "\"잠깐만요, 최 이사님. 김민준이라는 사람은 대체 어디에 있는 겁니까? 그리고… 왜 이렇게까지 저를 도와주시는 거죠? 솔직히 말씀해주세요. 뭔가 숨기고 계시죠?\"",
-        "최 이사는 대답 대신 나를 어두컴컴한 카페로 데려갔다. 텅 빈 테이블에 마주 앉자, 그는 굳은 표정으로 입을 열었다. \"태준 씨, 자네는 너무 순진해. 이 바닥은 원래 그런 곳이야. 서로 속고 속이는…\"",
-        "\"그게 무슨 말씀이시죠?\"",
-        "\"박 실장은… 단순한 돈 문제가 아니었어. 그는 엘도라도의 비리를 파헤치려 했고, 그 과정에서… 서연 씨의 집안과 관련된 비밀을 알게 된 거야.\"",
-        "나는 숨을 멈췄다. 서연의 집안? 설마… \"서연이가… 그 사고와 관련이 있다는 말씀이신가요?\"",
-        "최 이사는 고개를 끄덕였다. \"서연 씨의 아버지는… 꽤 영향력 있는 인물이야. 과거, 그의 비리를 폭로하려던 사람이 있었는데… 사고로 죽었지. 박 실장이 그걸 다시 들춰내려 하자, 서연 씨의 아버지 측에서…\"",
-        "\"말도 안 돼… 서연이가 그럴 리 없어!\"",
-        "\"태준 씨, 진실은 눈에 보이는 것과는 다를 때가 많아. 서연 씨는… 자네를 이용하고 있는 걸지도 몰라. 박 실장을 제거하기 위해서… 아니면, 더 큰 그림을 그리고 있는 걸 수도 있고.\"",
-        "\"그럼… 김민준은요? 왜 그 사람을 만나야 하는 거죠?\"",
-        "최 이사는 싸늘하게 웃었다. \"김민준은… 서연 씨의 가장 약점이야. 그를 만나면… 모든 진실을 알게 될 거야. 하지만… 조심해야 해. 서연 씨 측에서도 김민준을 찾고 있을 테니까.\"",
-        "나는 최 이사를 믿어야 할지, 서연을 믿어야 할지 혼란스러웠다. 하지만, 지금은 진실을 밝히는 것만이 살길이라는 것을 알았다. \"김민준은 어디에 있습니까?\"",
-        "\"자네에게 알려줄 수는 없어. 지금은 경찰의 감시망이 너무 촘촘해. 내가 안전한 장소를 마련해 두겠네. 내일 밤 10시, 강남역 12번 출구 앞에서 만나도록 하지. 혼자 와야 해. 그렇지 않으면… 자네도 위험해질 거야.\""
-      ]
-    }
-  },
-  "currentStep": 8,
-  "gameplay": {
-    "fontSize": 1.125
-  },
-  "ui": {
-    "isLoading": false,
-    "statusText": "모든 챕터 생성이 완료되었습니다!"
-  }
-};
-    let gameState = { currentNodeKey: 'chapter_0', currentPage: 0, currentNodeObject: null };
-    let settings = storyData.gameplay || { fontSize: 1.125 };
+<body class="bg-gray-100 p-2 text-xs">
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const gameContainer = document.getElementById('game-container');
-        gameContainer.addEventListener('click', (e) => {
-            const target = e.target.closest('[data-action]');
-            if (target) {
-                const action = target.dataset.action;
-                switch(action) {
-                    case 'close': window.close(); break;
-                    case 'inc-font': increaseFontSize(); break;
-                    case 'dec-font': decreaseFontSize(); break;
-                    case 'chars': toggleCharsModal(); break;
-                    case 'close-chars': toggleCharsModal(); break;
-                    case 'prev-page': handlePrevPage(); break;
-                    case 'next-page': handleNextPage(); break;
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-3">
+        
+        <div class="flex items-center justify-between mb-3 pb-2 border-b">
+            <h1 class="text-sm font-bold text-gray-800">DART 재무제표 조회</h1>
+            <img src="https://dart.fss.or.kr/images/common/logo_dart.png" alt="DART Logo" class="w-16">
+        </div>
+
+        <form id="dart-form" class="space-y-2">
+            <!-- 
+              API 키는 Vercel 백엔드(api/proxy.js)에서 안전하게 처리되므로 
+              여기서는 입력받을 필요가 없습니다.
+            -->
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label for="corp_code" class="block font-medium text-gray-600 mb-0.5">고유번호*</label>
+                    <input type="text" id="corp_code" placeholder="예: 00126380" required 
+                           class="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="bsns_year" class="block font-medium text-gray-600 mb-0.5">사업연도*</label>
+                    <input type="text" id="bsns_year" placeholder="예: 2023" required 
+                           class="w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label for="reprt_code" class="block font-medium text-gray-600 mb-0.5">보고서 코드*</label>
+                    <select id="reprt_code" required 
+                            class="w-full border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="11011">사업보고서 (11011)</option>
+                        <option value="11013">1분기보고서 (11013)</option>
+                        <option value="11012">반기보고서 (11012)</option>
+                        <option value="11014">3분기보고서 (11014)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fs_div" class="block font-medium text-gray-600 mb-0.5">개별/연결*</label>
+                    <select id="fs_div" required 
+                            class="w-full border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="OFS">재무제표 (OFS)</option>
+                        <option value="CFS">연결재무제표 (CFS)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                조회하기
+            </button>
+        </form>
+
+        <!-- 로딩 및 메시지 영역 -->
+        <div id="message-area" class="mt-3 text-center">
+            <div id="loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 mx-auto hidden"></div>
+            <p id="error-message" class="text-red-500 font-medium hidden"></p>
+            <p id="success-message" class="text-green-600 font-medium hidden"></p>
+        </div>
+
+        <!-- 결과 표시 영역 -->
+        <div id="result-area" class="mt-3 overflow-hidden">
+            <div id="result-summary" class="mb-2 p-2 bg-gray-50 rounded-md hidden">
+                <p><strong>접수번호:</strong> <span id="rcept_no"></span> <a id="dart-link" href="#" target="_blank" class="text-blue-600 hover:underline text-[10px] ml-1">[공시뷰어]</a></p>
+                <p><strong>사업연도:</strong> <span id="bsns_year_result"></span></p>
+                <p><strong>보고서:</strong> <span id="reprt_code_result"></span></p>
+            </div>
+            
+            <div class="overflow-x-auto w-full">
+                <table id="result-table" class="min-w-full bg-white border border-gray-200 hidden">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-2 py-1 border-b text-left font-semibold text-gray-600 uppercase tracking-wider">계정명</th>
+                            <th class="px-2 py-1 border-b text-right font-semibold text-gray-600 uppercase tracking-wider">당기</th>
+                            <th class="px-2 py-1 border-b text-right font-semibold text-gray-600 uppercase tracking-wider">전기</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-body" class="text-gray-700">
+                        <!-- 데이터가 여기에 동적으로 삽입됩니다. -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 요소
+        const form = document.getElementById('dart-form');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const resultArea = document.getElementById('result-area');
+        const resultSummary = document.getElementById('result-summary');
+        const resultTable = document.getElementById('result-table');
+        const resultBody = document.getElementById('result-body');
+
+        // 메시지 코드 매핑
+        const errorMessages = {
+            '010': '등록되지 않은 키입니다. (백엔드 설정 확인)',
+            '011': '사용할 수 없는 키입니다.',
+            '012': '접근할 수 없는 IP입니다.',
+            '013': '조회된 데이터가 없습니다.',
+            '014': '파일이 존재하지 않습니다.',
+            '020': '요청 제한을 초과하였습니다.',
+            '021': '조회 가능한 회사 개수가 초과하였습니다.',
+            '100': '필드의 부적절한 값입니다. 입력값을 확인해주세요.',
+            '101': '부적절한 접근입니다.',
+            '800': '시스템 점검으로 인한 서비스가 중지 중입니다.',
+            '900': '정의되지 않은 오류가 발생하였습니다.',
+            '901': '사용자 계정의 개인정보 보유기간이 만료된 키입니다.',
+            '500': '서버 오류가 발생했습니다. (프록시 설정 확인)'
+        };
+
+        // 폼 제출 이벤트
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loader.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+            resultSummary.classList.add('hidden');
+            resultTable.classList.add('hidden');
+            resultBody.innerHTML = '';
+
+            // 2. 폼 값 가져오기 (API 키 제외)
+            const corpCode = document.getElementById('corp_code').value;
+            const bsnsYear = document.getElementById('bsns_year').value;
+            const reprtCode = document.getElementById('reprt_code').value;
+            const fsDiv = document.getElementById('fs_div').value;
+
+            // 3. Vercel 프록시 API URL 생성
+            const params = new URLSearchParams({
+                corp_code: corpCode,
+                bsns_year: bsnsYear,
+                reprt_code: reprtCode,
+                fs_div: fsDiv
+            });
+            
+            // Vercel에 배포된 우리 백엔드 API를 호출
+            const proxyApiUrl = `/api/proxy?${params.toString()}`;
+
+            try {
+                // 4. API 호출
+                const response = await fetch(proxyApiUrl);
+                const data = await response.json();
+
+                // 5. API 응답 처리
+                if (data.status === '000') {
+                    successMessage.textContent = '조회 성공!';
+                    successMessage.classList.remove('hidden');
+                    displayResults(data.list, bsnsYear, reprtCode);
+                } else {
+                    // API 레벨 에러
+                    const message = errorMessages[data.status] || data.message || '알 수 없는 오류';
+                    showError(message);
                 }
-            } else {
-                handleNextPage();
+
+            } catch (error) {
+                // 네트워크 또는 프록시 에러
+                console.error('Fetch error:', error);
+                showError('데이터를 불러오는 데 실패했습니다. 네트워크 연결을 확인하거나 잠시 후 다시 시도해주세요.');
+            } finally {
+                loader.classList.add('hidden');
             }
         });
-        showNode('chapter_0');
-    });
 
-    function showNode(nodeKey) {
-        const gameContainer = document.getElementById('game-container');
-        if (!nodeKey || !storyData.story[nodeKey]) {
-            gameContainer.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-black">
-                    <h1 class="text-3xl font-bold mb-4">The End</h1>
-                    <p class="text-xl text-gray-300">이야기가 끝났습니다. 플레이해주셔서 감사합니다.</p>
-                </div>`;
-            return;
+        // 에러 메시지 표시
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
         }
-        gameState.currentNodeKey = nodeKey;
-        gameState.currentNodeObject = storyData.story[nodeKey];
-        gameState.currentPage = 0;
-        renderPage();
-    }
 
-    function renderPage() {
-        const gameContainer = document.getElementById('game-container');
-        const node = gameState.currentNodeObject;
-        if (!node || !node.content) return;
+        // 결과 표시
+        function displayResults(list, bsnsYear, reprtCode) {
+            if (!list || list.length === 0) {
+                showError('수신된 데이터가 없습니다.');
+                return;
+            }
 
-        const pageContent = node.content[gameState.currentPage];
-        const player = storyData.characters.find(c => c.role === 'player');
+            // 1. 요약 정보
+            const firstItem = list[0];
+            document.getElementById('rcept_no').textContent = firstItem.rcept_no;
+            document.getElementById('dart-link').href = `https://dart.fss.or.kr/dsaf001/main.do?rcpNo=${firstItem.rcept_no}`;
+            document.getElementById('bsns_year_result').textContent = bsnsYear;
+            
+            const reprtCodeText = {
+                '11011': '사업보고서',
+                '11013': '1분기보고서',
+                '11012': '반기보고서',
+                '11014': '3분기보고서'
+            };
+            document.getElementById('reprt_code_result').textContent = `${reprtCodeText[reprtCode] || reprtCode}`;
+            
+            resultSummary.classList.remove('hidden');
+            resultArea.classList.remove('overflow-hidden');
 
-        gameContainer.innerHTML = `
-            <div class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000" style="background-image: url('${node.image_url}');"></div>
-            <div class="absolute inset-0 vignette-overlay"></div>
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
-                <div class="flex items-center gap-2">
-                    <button data-action="chars" class="text-white bg-black/30 rounded-full p-2 hover:bg-white/20 transition-colors"><i data-lucide="users"></i></button>
-                    <div class="flex items-center space-x-1 text-white bg-black/30 rounded-full p-1">
-                        <button data-action="dec-font" class="p-1 hover:bg-white/20 rounded-full"><i data-lucide="minus"></i></button>
-                        <span class="px-2 text-sm">글자 크기</span>
-                        <button data-action="inc-font" class="p-1 hover:bg-white/20 rounded-full"><i data-lucide="plus"></i></button>
-                    </div>
-                </div>
-                <h1 class="text-xl font-bold game-text-shadow mx-4 truncate">${node.title}</h1>
-                <button data-action="close" class="text-white bg-black/30 rounded-full p-2 hover:bg-white/20 transition-colors"><i data-lucide="x"></i></button>
-            </div>
-            <div class="relative w-full h-full flex flex-col justify-end items-center p-4 sm:p-8 pb-8">
-                <div class="w-full max-w-4xl">
-                   <div class="text-box p-6 rounded-lg border border-white/10">
-                        <div class="mb-2"><span class="font-bold text-indigo-300 text-xl">${player.name}</span></div>
-                        <p id="game-text" class="game-text-shadow text-lg sm:text-xl leading-relaxed" style="font-size: ${settings.fontSize}rem;">${pageContent}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-                <button data-action="prev-page" class="text-white bg-black/30 rounded-full p-2 hover:bg-white/20 transition-colors ${gameState.currentPage === 0 ? 'invisible' : ''}"><i data-lucide="chevron-left"></i></button>
-                <div class="text-white/50 text-sm bg-black/30 px-3 py-1 rounded-full">${gameState.currentPage + 1} / ${node.content.length}</div>
-                <button data-action="next-page" class="text-white bg-black/30 rounded-full p-2 hover:bg-white/20 transition-colors"><i data-lucide="chevron-right"></i></button>
-            </div>`;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-    
-    function handleNextPage() {
-        if (gameState.currentPage < gameState.currentNodeObject.content.length - 1) {
-            gameState.currentPage++;
-            renderPage();
-        } else {
-            const nextNodeKey = `chapter_${parseInt(gameState.currentNodeKey.split('_')[1]) + 1}`;
-            showNode(nextNodeKey);
+            // 2. 재무제표 테이블
+            const grouped = {};
+            list.forEach(item => {
+                if (!grouped[item.sj_nm]) grouped[item.sj_nm] = [];
+                grouped[item.sj_nm].push(item);
+            });
+
+            for (const sj_nm in grouped) {
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'bg-gray-200';
+                headerRow.innerHTML = `<td colspan="3" class="px-2 py-1 font-bold text-gray-700">${sj_nm} (${firstItem.currency} 단위)</td>`;
+                resultBody.appendChild(headerRow);
+
+                const items = grouped[sj_nm].sort((a, b) => a.ord - b.ord);
+
+                items.forEach(item => {
+                    const formatAmount = (amount) => {
+                        if (!amount || amount === '-') return '-';
+                        return Number(amount).toLocaleString('ko-KR');
+                    };
+
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    
+                    let accountName = item.account_nm;
+                    if (item.account_detail && item.account_detail !== 'NULL' && item.account_detail !== item.account_nm) {
+                        const details = item.account_detail.split(' - ').slice(1).join(' / ');
+                        if (details) {
+                            accountName = `<span class="block">${item.account_nm}</span><span class="block text-gray-500 text-[10px] pl-2">${details}</span>`;
+                        }
+                    }
+
+                    row.innerHTML = `
+                        <td class="px-2 py-1 align-top">${accountName}</td>
+                        <td class="px-2 py-1 align-top text-right whitespace-nowrap">${formatAmount(item.thstrm_amount)}</td>
+                        <td class="px-2 py-1 align-top text-right whitespace-nowrap">${formatAmount(item.frmtrm_amount)}</td>
+                    `;
+                    resultBody.appendChild(row);
+                });
+            }
+
+            resultTable.classList.remove('hidden');
         }
-    }
-
-    function handlePrevPage() {
-        if (gameState.currentPage > 0) {
-            gameState.currentPage--;
-            renderPage();
-        }
-    }
-
-    function toggleCharsModal() {
-        let modal = document.getElementById('chars-modal');
-        if (modal) {
-            modal.remove();
-            return;
-        }
-        modal = document.createElement('div');
-        modal.id = 'chars-modal';
-        modal.className = 'absolute inset-0 bg-black/70 z-30 flex items-center justify-center p-8';
-        let modalContent = `<div class="bg-gray-800 p-6 rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto relative"><button data-action="close-chars" class="absolute top-4 right-4"><i data-lucide="x"></i></button><h2 class="text-2xl font-bold mb-4">등장인물</h2><div class="space-y-4">`;
-        storyData.characters.forEach(char => {
-            const roleDisplay = { player: '플레이어', main: '주요 인물', supporting: '조연' };
-            modalContent += `
-                <div class="bg-gray-900 p-4 rounded-md">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-xl text-indigo-400">${char.name}</span>
-                        <span class="text-sm bg-indigo-500/50 text-indigo-200 px-2 py-1 rounded-full">${roleDisplay[char.role]}</span>
-                    </div>
-                    <p class="text-gray-300">${char.description}</p>
-                </div>`;
-        });
-        modalContent += `</div></div>`;
-        modal.innerHTML = modalContent;
-        document.getElementById('game-container').appendChild(modal);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    function increaseFontSize() {
-        settings.fontSize = Math.min(settings.fontSize + 0.1, 3.0);
-        renderPage();
-    }
-
-    function decreaseFontSize() {
-        settings.fontSize = Math.max(settings.fontSize - 0.1, 0.8);
-        renderPage();
-    }
-</script>
+    </script>
 </body>
 </html>
+
