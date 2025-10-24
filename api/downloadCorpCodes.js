@@ -1,10 +1,14 @@
 /**
  * Vercel Serverless Function (Node.js)
- *
  * /api/downloadCorpCodes 엔드포인트
- * DART의 corpCode.xml API를 호출하고,
- * 반환된 Zip 파일을 클라이언트(브라우저)로 직접 스트리밍합니다.
+ * * Vercel의 기본 타임아웃(10초)을 60초로 연장합니다.
+ * Hobby 플랜에서도 최대 60초까지 가능합니다.
  */
+export const maxDuration = 60;
+
+// Node.js의 'stream' 모듈을 가져옵니다.
+import { Readable } from 'stream';
+
 export default async function handler(req, res) {
   
     // 1. Vercel 환경 변수에서 API 키를 안전하게 가져옵니다.
@@ -26,7 +30,6 @@ export default async function handler(req, res) {
 
         // 4. DART API 오류 처리 (키 오류 등)
         if (!apiResponse.ok) {
-            // DART는 오류 시 XML을 반환합니다.
             const errorText = await apiResponse.text();
             console.error('DART API Error:', errorText);
             const statusMatch = errorText.match(/<status>(\d+)<\/status>/);
@@ -41,7 +44,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 5. 응답이 Zip 파일인지 확인 (키가 틀리면 XML이 올 수 있음)
+        // 5. 응답이 Zip 파일인지 확인
         const contentType = apiResponse.headers.get('content-type');
         if (!contentType || !contentType.includes('application/zip')) {
              const errorText = await apiResponse.text();
@@ -59,25 +62,28 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'application/zip');
         res.setHeader('Content-Disposition', 'attachment; filename="CORPCODE.zip"');
         
-        // 7. DART API 응답(웹 스트림)을 Vercel 응답(Node.js 스트림)으로 수동 파이핑
-        const reader = apiResponse.body.getReader();
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-                break;
-            }
-            res.write(value); // 받은 데이터를 즉시 클라이언트로 씀
+        // 7. [수정됨] Web Stream을 Node.js Stream으로 변환하여 파이핑
+        // 이 방식이 Vercel 환경에서 더 안정적입니다.
+        if (apiResponse.body) {
+            const webStream = apiResponse.body;
+            const nodeStream = Readable.fromWeb(webStream);
+            await nodeStream.pipe(res);
+        } else {
+            throw new Error("API 응답에 body가 없습니다.");
         }
-        res.end(); // 스트림 종료
 
     } catch (error) {
         console.error('DART API 프록시 오류:', error);
         if (!res.headersSent) {
+            // 헤더가 전송되기 전에 오류가 발생한 경우에만 JSON 오류 응답
             return res.status(500).json({ 
                 status: '500', 
                 message: 'API 요청 중 서버에서 오류가 발생했습니다.' 
             });
         }
+        // 스트리밍이 시작된 후 오류가 발생하면 스트림만 종료
+        res.end();
     }
 }
+
 
