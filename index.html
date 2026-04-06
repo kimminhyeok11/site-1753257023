@@ -7,7 +7,238 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar { <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GURA TOON | 김구라의 독설 유머 시리즈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        :root { --brand-yellow: #facc15; --brand-black: #050505; }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--brand-black); color: white; margin: 0; overflow-x: hidden; }
+        
+        /* Custom Animations */
+        .reveal-text { clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
+        .gradient-text { background: linear-gradient(135deg, #facc15 0%, #eab308 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .ep-card { transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
+        .ep-card:active { transform: scale(0.96); }
+        
+        /* Glassmorphism */
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        /* Intro Loader */
+        #loader { fixed inset: 0; z-index: 999; background: var(--brand-black); display: flex; align-items: center; justify-content: center; }
+        
+        /* Custom Scroll */
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body>
+
+    <!-- Intro Animation Overlay -->
+    <div id="loader" class="fixed inset-0 z-[1000] bg-[#050505] flex flex-col items-center justify-center">
+        <h1 id="loader-logo" class="text-4xl font-black italic tracking-tighter opacity-0 scale-90">GURA TOON</h1>
+        <div id="loader-bar" class="w-12 h-[1px] bg-yellow-400 mt-4 scale-x-0"></div>
+    </div>
+
+    <div id="app" class="max-w-md mx-auto min-h-screen relative shadow-2xl overflow-x-hidden">
+        
+        <!-- Main Home View -->
+        <div id="home-view">
+            <!-- Header -->
+            <header id="main-header" class="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex justify-between items-center transition-all duration-500">
+                <span class="text-xl font-black italic tracking-tighter gradient-text">GURA TOON</span>
+                <div class="flex gap-4">
+                    <button class="w-10 h-10 flex items-center justify-center glass rounded-full opacity-60 hover:opacity-100">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="relative pt-32 pb-16 px-6 overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-yellow-400 font-bold text-xs tracking-widest uppercase mb-3 opacity-0 hero-fade">The King of Sarcasm</p>
+                    <h2 class="text-5xl font-black leading-[1.1] tracking-tight mb-6 opacity-0 hero-fade">
+                        에이~ 그건 <br/><span class="gradient-text italic">아니지!</span>
+                    </h2>
+                    <p class="text-white/50 text-sm leading-relaxed max-w-[280px] mb-8 opacity-0 hero-fade">
+                        김구라의 촌철살인 독설과 유머가 담긴 <br/>AI 생성 에피소드. 매일 새로운 웃음을 배달합니다.
+                    </p>
+                    <div class="flex gap-3 opacity-0 hero-fade">
+                        <button onclick="scrollToContent()" class="px-6 py-3 bg-yellow-400 text-black font-bold rounded-full text-sm active:scale-95 transition-transform">지금 읽기</button>
+                        <button class="px-6 py-3 glass rounded-full text-sm font-bold active:scale-95 transition-transform">소개</button>
+                    </div>
+                </div>
+                <!-- Background Decorative Element -->
+                <div class="absolute -right-20 top-20 w-64 h-64 bg-yellow-400/10 blur-[100px] rounded-full"></div>
+            </section>
+
+            <!-- Content Section -->
+            <section id="content-area" class="px-6 pb-32">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        최신 에피소드 <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
+                    </h3>
+                </div>
+                
+                <div id="episode-grid" class="space-y-10">
+                    <!-- Skeleton Loader -->
+                    <div class="space-y-8">
+                        <div class="h-80 glass rounded-[2.5rem] animate-pulse"></div>
+                        <div class="h-80 glass rounded-[2.5rem] animate-pulse"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Detail Viewer (Slide-up Panel) -->
+        <div id="detail-view" class="fixed inset-0 z-[100] bg-[#050505] translate-y-full overflow-y-auto hide-scroll">
+            <div id="detail-dynamic-content"></div>
+        </div>
+
+        <!-- Floating Navigation -->
+        <nav class="fixed bottom-6 left-6 right-6 z-50">
+            <div class="max-w-xs mx-auto glass rounded-full py-3 px-8 flex justify-around items-center border border-white/10 shadow-2xl backdrop-blur-2xl">
+                <button class="text-yellow-400 p-2"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></button>
+                <button class="text-white/30 p-2"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"></path></svg></button>
+                <button class="text-white/30 p-2"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://auhaxohbsnttmryesffe.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_wddiMfFQV6WeD0kpwl6n_w__Vrtx7Rl";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 1. Initial Animations
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to("#loader-logo", { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(1.7)" })
+              .to("#loader-bar", { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, "-=0.2")
+              .to("#loader", { yPercent: -100, duration: 0.8, ease: "power4.inOut", delay: 0.3 })
+              .from(".hero-fade", { opacity: 0, y: 30, stagger: 0.1, duration: 0.8, ease: "power3.out" }, "-=0.3");
+            
+            fetchEpisodes();
+        });
+
+        // 2. Data Fetching
+        async function fetchEpisodes() {
+            const { data, error } = await _supabase
+                .from('episodes')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const grid = document.getElementById('episode-grid');
+            if (error || !data || data.length === 0) {
+                grid.innerHTML = '<div class="py-20 text-center opacity-30 text-sm font-medium">에피소드가 아직 비어있습니다.</div>';
+                return;
+            }
+
+            window.episodesData = data;
+            grid.innerHTML = data.map((ep, idx) => `
+                <div onclick="openDetail('${ep.id}')" class="ep-card group relative cursor-pointer opacity-0 translate-y-10">
+                    <div class="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl">
+                        <img src="${ep.image_url}" class="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" alt="${ep.title}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
+                        <div class="absolute bottom-8 left-8 right-8">
+                            <span class="text-yellow-400 font-bold text-[10px] tracking-widest uppercase mb-2 block">EPISODE ${data.length - idx}</span>
+                            <h4 class="text-2xl font-black leading-tight tracking-tight">${ep.title}</h4>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            gsap.to(".ep-card", { opacity: 1, y: 0, stagger: 0.15, duration: 1, ease: "power4.out" });
+        }
+
+        // 3. Navigation & Detail Logic
+        function openDetail(id) {
+            const ep = window.episodesData.find(e => e.id === id);
+            const detailContainer = document.getElementById('detail-dynamic-content');
+            
+            detailContainer.innerHTML = `
+                <div class="relative">
+                    <button onclick="closeDetail()" class="fixed top-6 left-6 z-[110] w-12 h-12 glass rounded-full flex items-center justify-center text-white active:scale-90 transition-transform">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    
+                    <div class="w-full aspect-[3/4] overflow-hidden">
+                        <img src="${ep.image_url}" class="w-full h-full object-cover">
+                    </div>
+                    
+                    <div class="relative -mt-20 bg-[#050505] rounded-t-[3rem] p-8 pt-12 min-h-[60vh]">
+                        <div class="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-10"></div>
+                        <h2 class="text-3xl font-black mb-8 leading-tight">${ep.title}</h2>
+                        <div class="text-[17px] leading-[1.8] text-white/80 whitespace-pre-wrap mb-20 font-medium">
+                            ${ep.content}
+                        </div>
+                        
+                        <div class="pt-10 border-t border-white/5 pb-20">
+                            <h5 class="font-bold text-lg mb-6 flex items-center gap-2">
+                                독설 한마디 <span class="text-white/20 text-xs font-normal">댓글</span>
+                            </h5>
+                            <div id="comment-area" class="space-y-4 mb-8 text-sm"></div>
+                            <div class="flex gap-2">
+                                <input id="c-input" placeholder="에이~ 그건 아니지..." class="flex-1 glass p-4 rounded-2xl outline-none focus:border-yellow-400 transition-colors">
+                                <button onclick="postComment('${ep.id}')" class="bg-yellow-400 text-black px-6 rounded-2xl font-black active:scale-95 transition-transform">전송</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            gsap.to("#detail-view", { yPercent: -100, duration: 0.8, ease: "power4.inOut" });
+            loadComments(ep.id);
+        }
+
+        function closeDetail() {
+            gsap.to("#detail-view", { yPercent: 100, duration: 0.6, ease: "power3.in" });
+        }
+
+        async function loadComments(id) {
+            const { data } = await _supabase.from('comments').select('*').eq('episode_id', id).order('created_at', { ascending: true });
+            const area = document.getElementById('comment-area');
+            area.innerHTML = (data || []).map(c => `
+                <div class="p-4 glass rounded-2xl border-l-2 border-yellow-400">
+                    <p class="text-white/80">${c.comment}</p>
+                </div>
+            `).join('') || '<p class="opacity-20 text-xs">아직 독설이 없습니다. 첫 마디를 남겨보세요.</p>';
+        }
+
+        async function postComment(id) {
+            const input = document.getElementById('c-input');
+            if (!input.value.trim()) return;
+            await _supabase.from('comments').insert([{ episode_id: id, comment: input.value }]);
+            input.value = '';
+            loadComments(id);
+        }
+
+        function scrollToContent() {
+            document.getElementById('content-area').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            if (window.scrollY > 50) {
+                header.classList.add('bg-[#050505]/90', 'backdrop-blur-xl', 'py-3');
+            } else {
+                header.classList.remove('bg-[#050505]/90', 'backdrop-blur-xl', 'py-3');
+            }
+        });
+    </script>
+</body>
+</html>
+
+ 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background-color: #9ca3af; border-radius: 4px; }
         ::-webkit-scrollbar-track { background-color: #f3f4f6; }
         .loader { border-top-color: #3498db; animation: spin 1s linear infinite; }
